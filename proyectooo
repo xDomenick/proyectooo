@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <!-- Configuracion basica y libreria de graficas -->
+  <meta charset="UTF-8">
+  <title>Prueba de Dos Medias</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    /* Diseno general de la pagina */
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b,#334155);
+      color:white;
+      padding:30px;
+    }
+
+    /* Contenedor principal */
+    .container{
+      max-width:1300px;
+      margin:auto;
+      background:rgba(255,255,255,0.08);
+      padding:35px;
+      border-radius:25px;
+    }
+
+    /* Estilos generales */
+    textarea,button{
+      width:100%;
+      margin-top:15px;
+      padding:15px;
+      border-radius:15px;
+    }
+
+    /* area de resultados */
+    .results{
+      margin-top:30px;
+      padding:20px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.08);
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  
+  <h1>Prueba de Dos Medias</h1>
+
+  <!-- Explicacion del ejercicio -->
+  <div class="info">
+
+    Se comparan dos muestras usando una prueba Z.
+
+    <br><br>
+
+    <!-- Datos dinamicos -->
+    <strong>Muestra A:</strong>
+    <span id="textoA"></span>
+
+    <br><br>
+
+    <strong>Muestra B:</strong>
+    <span id="textoB"></span>
+
+  </div>
+
+
+  <!-- Entrada de datos -->
+  <textarea id="xValues">72,75,78,70,74,77,73,76</textarea>
+
+  <textarea id="yValues">68,70,72,69,71,73,67,70</textarea>
+
+
+  <!-- Boton que ejecuta el calculo -->
+  <button onclick="calcularPrueba()">
+    Calcular
+  </button>
+  <div class="results" id="resultados"></div>
+  <canvas id="grafica"></canvas>
+
+</div>
+
+<script>
+
+let chart; // Guarda la grafica actual
+
+
+// Calcula promedio
+function promedio(datos){
+
+  return datos.reduce((a,b)=>a+b,0)/datos.length;
+
+}
+
+
+// Calcula varianza
+function varianza(datos,media){
+
+  return datos.reduce((a,b)=>a+Math.pow(b-media,2),0)/datos.length;
+
+}
+
+function calcularPrueba(){
+
+
+  // Obtiene datos y los convierte a numeros
+  const x = document.getElementById('xValues').value
+    .split(',')
+    .map(n=>Number(n.trim()));
+
+  const y = document.getElementById('yValues').value
+    .split(',')
+    .map(n=>Number(n.trim()));
+
+
+  // Actualiza texto superior
+  textoA.innerText = x.join(', ');
+  textoB.innerText = y.join(', ');
+
+
+  // Calcula medias y varianzas
+  const mediaX = promedio(x);
+  const mediaY = promedio(y);
+
+  const varX = varianza(x,mediaX);
+  const varY = varianza(y,mediaY);
+
+
+  // Formula Z
+  const z = (mediaX - mediaY) /
+            Math.sqrt((varX/x.length)+(varY/y.length));
+
+
+  // Decision estadistica
+  let conclusion =
+  Math.abs(z)>1.96
+  ? "Se rechaza la hipótesis nula"
+  : "No se rechaza la hipótesis nula";
+
+
+  // Muestra resultados
+  resultados.innerHTML = `
+
+    <h2>Resultados</h2>
+
+    <p>Media A: ${mediaX.toFixed(2)}</p>
+
+    <p>Media B: ${mediaY.toFixed(2)}</p>
+
+    <p>Valor Z: ${z.toFixed(4)}</p>
+
+    <p>${conclusion}</p>
+
+  `;
+
+
+  // Evita graficas repetidas
+  if(chart){
+    chart.destroy();
+  }
+
+
+  // Genera grafica tipo montana
+  chart=new Chart(grafica,{
+
+    type:'line',
+
+    data:{
+
+      labels:['1','2','3','4','5','6','7','8'],
+
+      datasets:[
+
+        {
+          label:'Muestra A',
+          data:x,
+          borderColor:'#38bdf8',
+          fill:true,
+          tension:0.45
+        },
+
+        {
+          label:'Muestra B',
+          data:y,
+          borderColor:'#ef4444',
+          fill:true,
+          tension:0.45
+        }
+
+      ]
+    }
+
+  });
+
+}
+
+
+calcularPrueba();
+
+</script>
+
+</body>
+</html>
+```
